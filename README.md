@@ -1,2 +1,1 @@
-# kane619.github.io
-blog
+# 功崇惟志 业广惟勤
