@@ -1,0 +1,253 @@
+---
+layout: post
+title:  "iOS日常开发总结!"
+date:   2023-03-16 15:13:44 +0800
+categories: 学习
+---
+
+####1. button选中状态 左上##角有蓝色方块  
+buttontype设置由UIButtonTypeSystem改成UIButtonTypeCustom解决！
+
+ 
+
+####2. scrollview上button点击效果没有了 
+加上 _scrollView.delaysContentTouches=NO;//scrollview监听touch和移动,让他先响应touch
+
+ 
+
+####3. switch语句OC里出现问题：
+
+像下面的语句ViewController将无法识别，从而报expected expression的错误
+
+如果之前加上一条NSLog语句或者其他一些语句，则可以识别，但default:break;语句将报错
+
+- (void)buttonClicked:(UIButton *)sender{
+
+    switch (sender.tag) {
+
+        case 1:
+
+　　　　// NSLog(@"moonglow");
+
+            LViewController *help = [[LViewController alloc] initWithNibName:@"LViewController"bundle:nil];
+
+            [selfpresentViewController:help animated:YEScompletion:NULL];
+
+            break;
+
+        default:
+
+            break;
+
+    }
+
+解决的办法是在case语句后加大括号
+
+- (void)buttonClicked:(UIButton *)sender{
+
+    switch (sender.tag) {
+
+        case 1:{
+
+            LViewController *help = [[LViewController alloc] initWithNibName:@"LViewController"bundle:nil];
+
+            [selfpresentViewController:help animated:YEScompletion:NULL];
+
+            break;
+
+　　　}　
+
+        default:
+
+            break;
+
+    }
+
+####4. 真机调试NSLog不打印日志信息
+
+ 
+
+Product --> Scheme -->  Edit Scheme 里设置debugger 成gdb， 我没有找到这个设置。
+
+我之前发现  ios9以前的 如果不加图片的那句 在xcode8  会打印一些没用的日志 但是你的系统要是ios10 如果真机调试 加了这句就不会打印 
+
+要是删除了就能 
+
+
+
+ 
+
+####5. ios present一个视图时背景透明
+
+ 
+
+   LoginAndRegisterViewController *vc = [LoginAndRegisterViewControllernew];
+
+            vc.modalTransitionStyle =UIModalTransitionStyleFlipHorizontal;
+
+            if ([[UIDevicecurrentDevice].systemVersionfloatValue] >= 8.0) {
+
+                vc.providesPresentationContextTransitionStyle =YES;
+
+                vc.definesPresentationContext =YES;
+
+                vc.modalPresentationStyle =UIModalPresentationOverCurrentContext;
+
+                [selfpresentViewController:vcanimated:YEScompletion:nil];
+
+            } else {
+
+                self.view.window.rootViewController.modalPresentationStyle =                  UIModalPresentationCurrentContext;
+
+                [selfpresentViewController:vcanimated:NOcompletion:nil];
+
+            }
+
+####6. 解决UIColor设置值溢出的警告(UIColorBreakForOutOfRangeColorComponents)
+就是说，创建UIColor的时候给的参数溢出，RGB值的范围是[0,1]，如果给定一个超出这个值的参数，就会有这个警告，而整个app里面设置UIColor的地方非常多，要找到这个地方很困难。Xcode给出的提示是在UIColorBreakForOutOfRangeColorComponents这里打个断点，但是完全不知道怎么断。在尝试了一下之后按照以下步骤可以找到出问题的代码：
+
+Step 1. 创建一个Symbolic断点
+
+Step 2. 设置Symbol断点的值
+
+Step 3. 运行应用，通过call stack找到出问题的代码
+
+####7. ld  library not found for lxxx
+ 引用库文件出错，如缺少.a静态库 必须把文件拖进去才能引用 使用AddFiles 文件不会真正存入到系统工程文件件
+
+####8. iOS开发键盘弹出屏幕上##移
+#pragma mark ******屏幕上弹
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField{
+
+    if (textField.tag==11 || textField.tag==12) {
+
+        //键盘高度216
+
+        //滑动效果（动画）
+
+        [UIViewbeginAnimations:@"ResizeForKeyboard" context:nil];
+
+        [UIViewsetAnimationDuration:0.3f];
+
+        //将视图的Y坐标向上移动，以使下面腾出地方用于软键盘的显示
+
+        self.dataScrollView.frame =CGRectMake(0.0f, -100.0f,boundswidth,boundsheight);//64-216
+
+        [UIViewcommitAnimations];
+
+    }
+
+}
+
+#pragma mark ******屏幕恢复
+
+-(void)textFieldDidEndEditing:(UITextField *)textField{
+
+    //滑动效果
+
+    [UIViewbeginAnimations:@"ResizeForKeyboard" context:nil];
+
+    [UIViewsetAnimationDuration:0.30f];
+
+    
+
+    //恢复屏幕
+
+    self.dataScrollView.frame = CGRectMake(0.0f,0.0f,boundswidth,boundsheight);//64-216
+
+    
+
+    [UIViewcommitAnimations];
+
+}
+
+如图，在textField开始编辑和结束编辑的时候分别改变视图frame 分别上移和恢复 即可实现
+####9. iOS版本比较 
+如1.1.0 和 1.1.2 一开始没发现是两个小数点  导致用浮点数 出错
+NSString *num1 = @"5.2.0";    NSString *num2 = @"5.3.0";    
+
+if ([num1 compare:num2 options:NSNumericSearch] ==NSOrderedDescending)   
+
+{        
+
+ULog(@"%@ is bigger",num1);    
+
+}
+
+else    {        
+
+ULog(@"%@ is bigger",num2);    
+
+}
+
+解释：
+
+NSOrderedDescending是降序，如果numb1>numb2用这个函数相比较那么就等于降序。
+
+####10. UIFont fontSize
+The size (in points) to which the font is scaled. This value must be greater than 0.0.
+fontSize实际的参数是pointSize，是像素点。
+
+windows和mac上的字号是统一的。
+英文字体的1磅，相当于1/72 英寸，约等于1/2.8mm。
+12PT的字打印出来约为4.2mm。网页中12px的字才相当于12像素。
+虽然 四号=(14/72)*96=18.6px 更接近 19px，但是因为 18px 是点阵，所以系统还是优先显示点阵字号的。
+S像素值的对应关系：
+
+####11. UITabBar类
+iOS7及以上版本有改动，UITabBar类添加了一个translucent属性，UINavigationBar类中的translucent属性也默认修改为YES。也就是说默认使用了这两个bar之后，显示的是半透明的效果，能够模糊看到被bar遮盖的东西。这会导致一些问题，比如配色的色差以及我们下面将的xib文件控件位置起点的问题。
+
+默认情况下，我们使用UINavigationController和UITabBarController，而且不修改其中的translucent等属性，
+
+####12. iOS nsmutablearray
+   不能使用copy初始化 不然删除元素的时候回报错
+
+ 
+####13. iOS数组倒序排列
+  //通过自带的compare方法升序排列
+  NSMutableArray *array = [[NSMutableArray alloc] initWithObjects:@"5",@"1",@"4",@"2",nil];
+
+   [array sortUsingSelector:@selector(compare:)];
+
+   //通过倒序的方法进行降序排列
+    NSEnumerator *enumerator = [array reverseObjectEnumerator];
+
+   array =[[NSMutableArray alloc]initWithArray: 
+   
+   [enumerator allObjects]];
+####14. 查看第三方库支持的架构
+
+比如查看威富通的SDK  cd 到项目   SPaySDK
+
+lipo -info libSPaySDK.a
+
+####15.  xib tableview didSelectRowAtIndexPath不起作用
+
+由于用xib写的  不小心在xib里面点了 Selection NO 选择Single Selection解决
+
+####16.wifiMac
+
++ (NSString *)wifiMac
+{
+    NSArray *ifs = CFBridgingRelease(CNCopySupportedInterfaces());
+    id info = nil;
+    for (NSString *ifname in ifs) {
+        info = (__bridge_transfer id)CNCopyCurrentNetworkInfo((CFStringRef) ifname);
+        if (info && [info count]) {
+            break;
+        }
+    }
+    NSDictionary *dic = (NSDictionary *)info;
+    NSString *bssid = [dic objectForKey:@"BSSID"];
+
+    return bssid;
+}
+通过上面我们可以了解到，要在iOS12以上的系统中继续使用方法，就需要获取授权。如果你使用的是自动签名，授权之后Xcode会自动在App ID和应用的权限列表中增加WiFi的权限。如果你使用的是手动签名，可能还需要去App ID中配置一下权限，并生成新的profile文件。
+具体的操作如下
+设置Capabilities步骤：Target -> Capabilities -> Access WiFi Information -> ON
+
+####17. xcode10升级报错处理
+sudo cp ~/Desktop/libstdc++/iPhoneOS/* /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/lib/sudo cp ~/Desktop/libstdc++/iPhoneSimulator/* /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/lib
+
+####  -------To be continued

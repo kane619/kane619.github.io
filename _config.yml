@@ -18,20 +18,26 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: 网络日志
+title: 我的网络日志
 email: 318026323@qq.com
 description: >- # this means to ignore newlines until "baseurl:"
   功崇惟志，业广惟勤
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://kane619.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: kane619
 github_username:  kane619
 
 # Build settings
 theme: minima
 plugins:
   - jekyll-feed
-
+valine_comment:
+  enable: true
+# app_id
+  leancloud_appid: CuN4lmyid8HruH67Xu1VO3dZ-gzGzoHsz
+# app_key
+  leancloud_appkey: CuN4lmyid8HruH67Xu1VO3dZ-gzGzoHsz
+# placeholde
+  placeholder: “Just do it"
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to
